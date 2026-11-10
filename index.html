@@ -259,12 +259,8 @@
 window.KEY = 'kgpHub_v3';
 window.loadState = function() {
   try {
-    const d = JSON.parse(localStorage.getItem(window.KEY));
-    if (d) {
-      // Clear shared session on fresh load to prevent session bleeding
-      d.session = null; 
-      return d;
-    }
+    // Stale local cache removed: Firestore is the single source of truth now
+    localStorage.removeItem(window.KEY);
   } catch(e) {}
   return { users: [], vendors: [], items: [], orders: [], complaints: [], session: null, seq: 1000, closedBatches: {} };
 };
@@ -275,8 +271,8 @@ if (!window.S.closedBatches) window.S.closedBatches = {};
 <!-- Application Logic Scripts -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, collection, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, collection, onSnapshot, setDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'iitkgp-hub-app';
  const firebaseConfig = {
@@ -315,33 +311,41 @@ window.KGP_LOCATIONS = [
 
 let cloudConnected = false;
 
-window.save = function() {
-  try {
-    localStorage.setItem(window.KEY, JSON.stringify(window.S));
-  } catch(e) {}
+// ---- Per-document Firestore sync (fixes overwrite races of the old single-blob design) ----
+const COLS = ['users','vendors','items','orders','complaints'];
+const colRef = n => collection(db, 'artifacts', appId, 'public', 'data', n);
+const lastSynced = {};            // name -> { id: jsonString }
+COLS.forEach(n => lastSynced[n] = {});
+const firstLoad = {};             // name -> resolved after first snapshot
+let unsubs = [];
+let _readyResolve;
+window.dataReady = new Promise(r => _readyResolve = r);
 
-  if(auth.currentUser) {
-    try {
-      // RULE 1 COMPLIANT PATH: /artifacts/{appId}/public/data/{collectionName}
-      const sharedDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'hub_state', 'shared');
-      setDoc(sharedDocRef, {
-        users: window.S.users || [],
-        vendors: window.S.vendors || [],
-        items: window.S.items || [],
-        orders: window.S.orders || [],
-        complaints: window.S.complaints || [],
-        closedBatches: window.S.closedBatches || {}
-      }, { merge: true }).then(() => {
-        setOnlineStatus();
-      }).catch(err => {
-        console.warn("Cloud write restricted:", err.message);
-        setOfflineStatus();
-      });
-    } catch(err) {
-      console.warn("Cloud sync write error:", err);
-      setOfflineStatus();
-    }
-  }
+window.save = function() {
+  try { localStorage.setItem(window.KEY, JSON.stringify(window.S)); } catch(e) {}
+  if(!auth.currentUser) return;
+  COLS.forEach(n => {
+    const list = window.S[n] || [];
+    const seen = {};
+    list.forEach(rec => {
+      const id = String(rec.id);
+      seen[id] = true;
+      const json = JSON.stringify(rec);
+      if(lastSynced[n][id] !== json) {
+        lastSynced[n][id] = json;
+        setDoc(doc(db,'artifacts',appId,'public','data',n,id), JSON.parse(json))
+          .then(setOnlineStatus)
+          .catch(err => { console.warn('Cloud write failed ('+n+'):', err.message); delete lastSynced[n][id]; setOfflineStatus(); });
+      }
+    });
+    Object.keys(lastSynced[n]).forEach(id => {
+      if(!seen[id]) {
+        delete lastSynced[n][id];
+        deleteDoc(doc(db,'artifacts',appId,'public','data',n,id)).catch(err => console.warn('Cloud delete failed:', err.message));
+      }
+    });
+  });
+  setDoc(doc(db,'artifacts',appId,'public','data','meta','closedBatches'), { v: JSON.stringify(window.S.closedBatches || {}) }, {merge:true}).catch(()=>{});
 };
 
 function setOfflineStatus() {
@@ -360,52 +364,53 @@ function setOnlineStatus() {
   if(text) text.textContent = "Connected to Common Campus Network";
 }
 
-function initFirestoreSync() {
-  try {
-    // RULE 1 COMPLIANT PATH: /artifacts/{appId}/public/data/{collectionName}
-    const sharedDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'hub_state', 'shared');
-    
-    onSnapshot(sharedDocRef, (snapshot) => {
+function startSync() {
+  stopSync();
+  let pending = COLS.length;
+  COLS.forEach(n => {
+    let got = false;
+    const un = onSnapshot(colRef(n), snap => {
       setOnlineStatus();
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        if(data) {
-          window.S.users = data.users || window.S.users || [];
-          window.S.vendors = data.vendors || window.S.vendors || [];
-          window.S.items = data.items || window.S.items || [];
-          window.S.orders = data.orders || window.S.orders || [];
-          window.S.complaints = data.complaints || window.S.complaints || [];
-          window.S.closedBatches = data.closedBatches || window.S.closedBatches || {};
-          if(window.render) window.render();
-        }
-      } else {
-        window.save();
-      }
-    }, (err) => {
-      console.warn("Firestore snapshot error:", err.message);
+      const arr = [];
+      const map = {};
+      snap.forEach(d => { const rec = d.data(); arr.push(rec); map[String(rec.id)] = JSON.stringify(rec); });
+      lastSynced[n] = map;
+      window.S[n] = arr;
+      if(!got){ got = true; if(--pending === 0) _readyResolve(); }
+      if(window.render) window.render();
+    }, err => {
+      console.warn('Firestore snapshot error ('+n+'):', err.message);
       setOfflineStatus();
+      if(!got){ got = true; if(--pending === 0) _readyResolve(); }
     });
-  } catch(e) {
-    console.warn("Firestore initialization error:", e);
-    setOfflineStatus();
-  }
+    unsubs.push(un);
+  });
+  onSnapshot(doc(db,'artifacts',appId,'public','data','meta','closedBatches'), snap => {
+    if(snap.exists()) { try { window.S.closedBatches = JSON.parse(snap.data().v || '{}'); } catch(e){} }
+  }, ()=>{});
+}
+function stopSync() {
+  unsubs.forEach(u => { try{u();}catch(e){} });
+  unsubs = [];
+  COLS.forEach(n => lastSynced[n] = {});
+  window.dataReady = new Promise(r => _readyResolve = r);
 }
 
-// RULE 3 COMPLIANT: Authenticate FIRST, then attach snapshot listeners
-async function startAuth() {
-  try {
-    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-      await signInWithCustomToken(auth, __initial_auth_token);
-    } else {
-      await signInAnonymously(auth);
-    }
-    initFirestoreSync();
-  } catch(e) {
-    console.warn("Auth failed, falling back to local mode:", e);
-    setOfflineStatus();
+// Restore session on page refresh; start sync only for signed-in users
+onAuthStateChanged(auth, async user => {
+  if(!user) { stopSync(); window.S.session = null; return; }
+  startSync();
+  await window.dataReady;
+  // restore session from the user's profile (users/{uid})
+  const profile = window.S.users.find(u => String(u.id) === user.uid);
+  if(profile && window.cur === 'landing' && !window._authBusy) {
+    window.S.session = { uid: user.uid, role: profile.role };
+    window.role = profile.role;
+    window.enter();
   }
-}
-startAuth();
+});
+
+window.fbAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut };
 
 // Global UI State
 window.cur = 'landing';
@@ -423,7 +428,7 @@ window.newImg = '';
 window.lastOrder = null;
 window.cart = {vid: null, q: {}};
 
-window.nid = () => ++window.S.seq;
+window.nid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 window.me = () => window.S.users.find(u => window.S.session && String(u.id) === String(window.S.session.uid));
 
 window.mv = () => {
@@ -707,11 +712,11 @@ auth: () => {
       
       <div>
         <label class="lb">KGP Email / Username</label>
-        <input id="l-user" class="in font-mono" value="${window.role==='vendor'?'vendor@iitkgp.ac.in':''}" placeholder="student@iitkgp.ac.in">
+        <input id="l-user" class="in font-mono" placeholder="student@iitkgp.ac.in">
       </div>
       <div>
         <label class="lb">Password</label>
-        <input id="l-pass" type="password" class="in" value="password123" placeholder="••••••••">
+        <input id="l-pass" type="password" class="in" placeholder="••••••••">
       </div>
       <button data-a="login" class="b w-full mt-4 py-3 text-xs uppercase tracking-wider font-bold">
         <i class="fa-solid fa-right-to-bracket"></i> Enter ${window.role==='vendor'?'Store Dashboard':'Campus Marketplace'}
@@ -1411,60 +1416,50 @@ go: v => window.go(v),
 role: r => { window.role=r; window.authMode='choice'; if(window.S.session&&window.S.session.role===r) window.enter(); else window.go('auth'); },
 setAuthMode: m => { window.authMode=m; window.render(); },
 
-login: () => {
-  const userEmail = window.$('l-user').value.trim().toLowerCase();
-  const pass = window.$('l-pass').value.trim();
-  if(!userEmail || !pass) return window.toast('Please enter email/username and password');
-
-  // Extract a clean name from the email prefix or use it as a base
-  const cleanName = userEmail.split('@')[0];
-  const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
-
-  let u = window.S.users.find(x => x.email === userEmail && x.role === window.role);
-  if(!u){
-    u = {
-      id: 'usr_' + window.nid(),
-      role: window.role,
-      name: formattedName,
-      email: userEmail,
-      phone: '9832145670',
-      hall: 'Radhakrishnan (RK) Hall'
-    };
-    window.S.users.push(u);
-  } else {
-    // Update name if it was previously set incorrectly
-    u.name = formattedName;
-  }
-
-  window.S.session = { uid: u.id, role: window.role };
-  window.save();
-  window.enter();
+login: async () => {
+  const email = window.$('l-user').value.trim().toLowerCase();
+  const pass = window.$('l-pass').value;
+  if(!email || !pass) return window.toast('Please enter email and password');
+  window._authBusy = true;
+  try {
+    const cred = await window.fbAuth.signInWithEmailAndPassword(window.fbAuth.auth, email, pass);
+    await window.dataReady;
+    const profile = window.S.users.find(u => String(u.id) === cred.user.uid);
+    if(!profile) { await window.fbAuth.signOut(window.fbAuth.auth); return window.toast('No profile found. Please register first.'); }
+    if(profile.role !== window.role) {
+      await window.fbAuth.signOut(window.fbAuth.auth);
+      return window.toast('This account is a ' + profile.role + ' account. Go back and choose the ' + profile.role + ' option.');
+    }
+    window.S.session = { uid: profile.id, role: profile.role };
+    window.enter();
+  } catch(e) {
+    const m = {'auth/invalid-credential':'Wrong email or password','auth/user-not-found':'No account with this email','auth/wrong-password':'Wrong password','auth/too-many-requests':'Too many attempts, try later','auth/operation-not-allowed':'Email/Password sign-in is not enabled in Firebase console'};
+    window.toast(m[e.code] || ('Login failed: ' + e.code));
+  } finally { window._authBusy = false; }
 },
 
-auth: () => {
+auth: async () => {
   const name = window.$('a-name') ? window.$('a-name').value.trim() : '';
   const email = window.$('a-email') ? window.$('a-email').value.trim().toLowerCase() : '';
+  const pass = window.$('a-pass') ? window.$('a-pass').value : '';
   const phone = window.$('a-phone') ? window.$('a-phone').value.trim() : '';
   const hallEl = window.$('a-hall');
   const hall = (window.role === 'customer' && hallEl) ? hallEl.value : '';
-
-  if(!name || !email.includes('@') || phone.length < 8) {
-    return window.toast('Enter your full name, valid KGP email, and phone number');
-  }
-
-  let u = window.S.users.find(x => x.email === email && x.role === window.role);
-  if(u){
-    u.name = name; // Forces update to the name you just typed
-    u.phone = phone;
-    if(hall) u.hall = hall;
-  } else {
-    u = {id: 'usr_' + window.nid(), role: window.role, name, email, phone, hall};
+  if(!name || !email.includes('@') || phone.length < 8) return window.toast('Enter your full name, valid KGP email, and phone number');
+  if(pass.length < 6) return window.toast('Password must be at least 6 characters');
+  window._authBusy = true;
+  try {
+    const cred = await window.fbAuth.createUserWithEmailAndPassword(window.fbAuth.auth, email, pass);
+    await window.dataReady;
+    const u = { id: cred.user.uid, role: window.role, name, email, phone, hall };
     window.S.users.push(u);
-  }
-
-  window.S.session = {uid: u.id, role: window.role};
-  window.save();
-  window.enter();
+    window.S.session = { uid: u.id, role: u.role };
+    window.save();
+    window.enter();
+  } catch(e) {
+    const m = {'auth/email-already-in-use':'This email is already registered. Please log in instead.','auth/weak-password':'Password too weak','auth/invalid-email':'Invalid email','auth/operation-not-allowed':'Email/Password sign-in is not enabled in Firebase console'};
+    window.toast(m[e.code] || ('Sign up failed: ' + e.code));
+  } finally { window._authBusy = false; }
 },
 
 onboard: () => {
@@ -1499,12 +1494,12 @@ onboard: () => {
   window.go('vdash');
 },
 
-logout: () => {
+logout: async () => {
+  try { await window.fbAuth.signOut(window.fbAuth.auth); } catch(e) {}
   window.S.session = null;
   window.role = null;
   window.authMode = 'choice';
-  localStorage.removeItem(window.KEY); // Clear local session cache
-  window.save();
+  window.cart = {vid:null, q:{}};
   window.go('landing');
 },
 
