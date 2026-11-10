@@ -260,7 +260,11 @@ window.KEY = 'kgpHub_v3';
 window.loadState = function() {
   try {
     const d = JSON.parse(localStorage.getItem(window.KEY));
-    if (d) return d;
+    if (d) {
+      // Clear shared session on fresh load to prevent session bleeding
+      d.session = null; 
+      return d;
+    }
   } catch(e) {}
   return { users: [], vendors: [], items: [], orders: [], complaints: [], session: null, seq: 1000, closedBatches: {} };
 };
