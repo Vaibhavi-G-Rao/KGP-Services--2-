@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIT KGP Student Service & Micro-Vendor Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      }
+      .font-mono {
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .in {
+        width: 100%;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 0.75rem;
+        padding: 0.55rem 0.85rem;
+        font-size: 0.875rem;
+        color: #f8fafc;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+      .in:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+      }
+      .b {
+        border-radius: 0.75rem;
+        padding: 0.55rem 0.95rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: #4f46e5;
+        color: #fff;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        transition: all 0.15s ease;
+      }
+      .b:hover {
+        background: #4338ca;
+        transform: translateY(-0.5px);
+      }
+      .b2 {
+        background: #1e293b;
+        border: 1px solid #334155;
+        color: #cbd5e1;
+      }
+      .b2:hover {
+        background: #334155;
+        color: #fff;
+      }
+      .cd {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 1rem;
+        padding: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+      }
+      .lb {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #94a3b8;
+        margin: 0.65rem 0 0.25rem;
+      }
+      .hd {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.45rem;
+      }
+      .badge-overdue {
+        background: #881337;
+        color: #fecdd3;
+        border: 1px solid #e11d48;
+        font-size: 0.65rem;
+        padding: 0.15rem 0.45rem;
+        border-radius: 0.5rem;
+        font-weight: 700;
+      }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen antialiased selection:bg-indigo-500 selection:text-white">
+
+<!-- APP HEADER -->
+<header class="bg-slate-800/90 backdrop-blur-md border-b border-slate-700/80 sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-md">
+  <div data-a="go" data-v="landing" class="cursor-pointer font-bold text-indigo-300 flex items-center gap-2 hover:text-indigo-200 transition">
+    <span class="text-xl">🏛️</span>
+    <span class="tracking-tight text-base font-extrabold bg-gradient-to-r from-indigo-300 to-purple-300 bg-clip-text text-transparent">KGP Campus Hub</span>
+  </div>
+  <div id="who" class="text-xs text-slate-300 font-medium flex items-center gap-2"></div>
+</header>
+
+<!-- GLOBAL REALTIME CLOUD STATUS BAR -->
+<div id="cloud-bar" class="bg-slate-900 border-b border-indigo-500/30 px-4 py-2 flex flex-wrap justify-between items-center gap-2 text-xs">
+  <div class="flex items-center gap-2">
+    <span id="cloud-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+    <span id="cloud-status-text" class="text-slate-300 font-medium text-[11px]">Connected to Common Campus Network</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <button data-a="showWebUrlModal" class="b text-[10px] py-1 px-2.5 bg-purple-600 hover:bg-purple-500 font-bold">
+      <i class="fa-solid fa-globe"></i> Get Public Web Link
+    </button>
+    <button data-a="shareStoreLink" class="b text-[10px] py-1 px-2.5 bg-indigo-600 hover:bg-indigo-500 font-bold">
+      <i class="fa-solid fa-share-nodes"></i> Share Store Network Code
+    </button>
+  </div>
+</div>
+
+<!-- MAIN CONTAINER -->
+<main id="app" class="max-w-md mx-auto p-4 pb-28 space-y-4"></main>
+
+<!-- PUBLIC WEB LINK MODAL -->
+<div id="webUrlModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 items-center justify-center p-4">
+  <div class="cd max-w-sm w-full space-y-3 relative border border-purple-500/50 shadow-2xl bg-slate-900 text-center">
+    <button data-a="closeWebUrlModal" class="absolute top-3 right-3 text-slate-400 hover:text-white text-base">✕</button>
+    
+    <div class="w-12 h-12 bg-purple-600/20 text-purple-400 rounded-full flex items-center justify-center mx-auto text-xl ring-4 ring-purple-500/10">
+      <i class="fa-solid fa-earth-americas"></i>
+    </div>
+
+    <div>
+      <h3 class="font-bold text-base text-white">Public Web Access Link</h3>
+      <p class="text-xs text-slate-400 mt-0.5">Share this URL or QR code with friends on WhatsApp to open your store live!</p>
+    </div>
+
+    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+      <p class="text-[10px] uppercase font-bold text-slate-400">Scan to Open on Mobile</p>
+      <img id="url-qr-img" src="" alt="Website QR Code" class="w-32 h-32 mx-auto rounded-lg border border-slate-700">
+      <input id="public-url-input" class="in text-center font-mono text-[11px] bg-slate-900 border-slate-700" readonly>
+    </div>
+
+    <div class="flex gap-2 pt-1">
+      <button data-a="copyPublicUrl" class="b w-full py-2.5 text-xs font-bold bg-purple-600 hover:bg-purple-500">
+        <i class="fa-solid fa-copy"></i> Copy Direct Website Link
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment proof preview modal -->
+<div id="modal" data-a="closeModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 items-center justify-center p-4">
+  <div class="relative max-w-sm w-full">
+    <img id="mimg" alt="Payment proof" class="max-h-[80vh] w-auto mx-auto rounded-2xl shadow-2xl border border-slate-700">
+    <p class="text-center text-xs text-slate-400 mt-2">Click anywhere to close</p>
+  </div>
+</div>
+
+<!-- ITEM EDIT MODAL -->
+<div id="editItemModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-4">
+  <div class="cd max-w-sm w-full space-y-3 relative border border-indigo-500/50 shadow-2xl bg-slate-900">
+    <button data-a="closeEditModal" class="absolute top-3 right-3 text-slate-400 hover:text-white text-base">✕</button>
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-sm font-bold">
+        <i class="fa-solid fa-pen-to-square"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-sm text-white">Edit Menu Offering</h3>
+        <p class="text-[11px] text-slate-400">Update item pricing, inventory or title</p>
+      </div>
+    </div>
+    <input type="hidden" id="edit-id">
+    <div>
+      <label class="lb">Item Title</label>
+      <input id="edit-name" class="in" placeholder="Item name">
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <div>
+        <label class="lb">Price (₹)</label>
+        <input id="edit-price" type="number" step="1" class="in font-mono" placeholder="Price">
+      </div>
+      <div>
+        <label class="lb">Stock Quantity</label>
+        <input id="edit-stock" type="number" step="1" class="in font-mono" placeholder="Stock">
+      </div>
+    </div>
+    <div class="flex gap-2 pt-2">
+      <button data-a="closeEditModal" class="b b2 flex-1 py-2 text-xs">Cancel</button>
+      <button data-a="saveItemEdit" class="b flex-1 py-2 text-xs bg-indigo-600 hover:bg-indigo-500 font-bold">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ITEM DELETE CONFIRM MODAL -->
+<div id="deleteConfirmModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 items-center justify-center p-4">
+  <div class="cd max-w-sm w-full space-y-3 relative border border-rose-500/50 shadow-2xl bg-slate-900 text-center">
+    <div class="w-12 h-12 bg-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mx-auto text-xl">
+      <i class="fa-solid fa-trash-can"></i>
+    </div>
+    <h3 class="font-bold text-base text-white">Remove Offering?</h3>
+    <p id="del-item-label" class="text-xs text-slate-300">Are you sure you want to remove this item from your active inventory?</p>
+    <input type="hidden" id="delete-id">
+    <div class="flex gap-2 pt-2">
+      <button data-a="closeDelModal" class="b b2 flex-1 py-2 text-xs">Cancel</button>
+      <button data-a="confirmDeleteItem" class="b flex-1 py-2 text-xs bg-rose-600 hover:bg-rose-500 font-bold">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- INTERACTIVE POP-OUT ORDER TICKET MODAL -->
+<div id="receiptModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 items-center justify-center p-4">
+  <div class="max-w-sm w-full space-y-3 relative bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+    <button data-a="closeReceipt" class="absolute top-3 right-3 text-slate-400 hover:text-white text-base w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center transition">✕</button>
+    
+    <div class="text-center pt-1 pb-1">
+      <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl mb-2 ring-4 ring-emerald-500/10">
+        <i class="fa-solid fa-receipt"></i>
+      </div>
+      <h3 class="font-extrabold text-base text-white tracking-wide">Campus Delivery Pass</h3>
+      <p class="text-[11px] text-slate-400">Order verification & Vendor POC contact slip</p>
+    </div>
+
+    <div id="receiptBody" class="space-y-3 text-xs bg-slate-800/90 p-4 rounded-xl border border-slate-700">
+      <!-- Injected dynamically -->
+    </div>
+
+    <div class="flex gap-2 pt-1">
+      <button data-a="closeReceipt" class="b w-full py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500">
+        <i class="fa-solid fa-check"></i> Done & Continue
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Pay/Submit Proof Modal -->
+<div id="payModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 items-center justify-center p-4">
+  <div class="cd max-w-sm w-full space-y-3 relative border border-slate-700 shadow-2xl">
+    <button data-a="closePayModal" class="absolute top-3 right-3 text-slate-400 hover:text-white text-lg">✕</button>
+    <h3 class="font-bold text-sm text-white">Pay / Upload Proof for <span id="payModalOid" class="text-indigo-400 font-mono"></span></h3>
+    <p id="payModalAmt" class="text-xs text-slate-300 font-bold"></p>
+    <div class="text-center bg-slate-900/90 p-3 rounded-xl border border-slate-700 space-y-1">
+      <p class="text-[10px] text-slate-400 font-medium">Scan IIT KGP UPI QR</p>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=upi://pay?pa=ratriruchigal@iitkgp&pn=RatriRuchigal" alt="QR" class="w-28 h-28 mx-auto my-1 rounded-lg border border-slate-800">
+      <p class="text-[11px] text-indigo-300 font-mono">ratriruchigal@iitkgp</p>
+    </div>
+    <label class="lb">Upload Screenshot Proof</label>
+    <input type="file" accept="image/*" data-c="payProof" class="text-xs w-full text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-slate-700 file:text-slate-200 hover:file:bg-slate-600">
+    <button data-a="submitPayProof" class="b w-full mt-2 py-2.5">Confirm Payment & Submit</button>
+  </div>
+</div>
+
+<!-- Toast notification box -->
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white border border-slate-600 px-4 py-2.5 rounded-2xl text-xs font-semibold shadow-2xl opacity-0 transition-opacity pointer-events-none z-50 flex items-center gap-2"></div>
+
+<!-- Synchronous Initial State Setup -->
+<script>
+window.KEY = 'kgpHub_v3';
+window.loadState = function() {
+  try {
+    const d = JSON.parse(localStorage.getItem(window.KEY));
+    if (d) return d;
+  } catch(e) {}
+  return { users: [], vendors: [], items: [], orders: [], complaints: [], session: null, seq: 1000, closedBatches: {} };
+};
+window.S = window.loadState();
+if (!window.S.closedBatches) window.S.closedBatches = {};
+</script>
+
+<!-- Application Logic Scripts -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, collection, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'iitkgp-hub-app';
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+  apiKey: "demo",
+  authDomain: "demo.firebaseapp.com",
+  projectId: "demo",
+  storageBucket: "demo.appspot.com",
+  messagingSenderId: "12345",
+  appId: "1:12345:web:12345"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.KEY = 'kgpHub_v3';
+window.CAT = {food:'🌙 Late Food',crochet:'🧶 Crafts',service:'✂️ Services',other:'🛍️ Other'};
+
+window.KGP_LOCATIONS = [
+  'Patel Hall of Residence', 'Azad Hall of Residence', 'Nehru Hall of Residence',
+  'Rajendra Prasad (RP) Hall', 'Radhakrishnan (RK) Hall', 'Meghnad Saha (MS) Hall',
+  'Lal Bahadur Shastri (LBS) Hall', 'Madan Mohan Malviya (MMM) Hall', 'B.R. Ambedkar Hall',
+  'Homi Jehangir Bhabha (HJB) Hall', 'Sister Nivedita (SN/IG) Hall', 'Ashutosh Mukherjee Hall',
+  'Vidyasagar Hall', 'JC Bose Hall', 'SAM Hall of Residence', 'SBP Hall of Residence',
+  'ABV (Atal Bihari Vajpayee) Hall', 'Nalanda Classroom Complex (NCC)',
+  'Main Academic Building (Heritage Wing)', 'Takshashila Academic Complex',
+  'Central Library (Near Main Bldg)', 'Computer Science & Engg Dept (CSE)',
+  'Mechanical Engineering Complex', 'Electrical & ECE Department Block',
+  'Chemical Engineering Department', 'Dept of Humanities & Social Sciences',
+  'Rajendra Mishra School of Engg Entrepreneurship', 'IIT KGP Main Gate',
+  'Tech Market (Near Gymkhana)', 'Gol Bazar Commercial Complex',
+  'Technology Students Gymkhana (TSG)', 'Tikka Circle Junction',
+  'Puri Gate Security Checkpost', 'STEP / TIETS Incubation Hub', 'Nehru Museum of Science & Technology'
+];
+
+let cloudConnected = false;
+
+window.save = function() {
+  try {
+    localStorage.setItem(window.KEY, JSON.stringify(window.S));
+  } catch(e) {}
+
+  if(auth.currentUser) {
+    try {
+      // RULE 1 COMPLIANT PATH: /artifacts/{appId}/public/data/{collectionName}
+      const sharedDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'hub_state', 'shared');
+      setDoc(sharedDocRef, {
+        users: window.S.users || [],
+        vendors: window.S.vendors || [],
+        items: window.S.items || [],
+        orders: window.S.orders || [],
+        complaints: window.S.complaints || [],
+        closedBatches: window.S.closedBatches || {}
+      }, { merge: true }).then(() => {
+        setOnlineStatus();
+      }).catch(err => {
+        console.warn("Cloud write restricted:", err.message);
+        setOfflineStatus();
+      });
+    } catch(err) {
+      console.warn("Cloud sync write error:", err);
+      setOfflineStatus();
+    }
+  }
+};
+
+function setOfflineStatus() {
+  cloudConnected = false;
+  const dot = window.$('cloud-dot');
+  const text = window.$('cloud-status-text');
+  if(dot) dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+  if(text) text.textContent = "Local Storage Sync Active";
+}
+
+function setOnlineStatus() {
+  cloudConnected = true;
+  const dot = window.$('cloud-dot');
+  const text = window.$('cloud-status-text');
+  if(dot) dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+  if(text) text.textContent = "Connected to Common Campus Network";
+}
+
+function initFirestoreSync() {
+  try {
+    // RULE 1 COMPLIANT PATH: /artifacts/{appId}/public/data/{collectionName}
+    const sharedDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'hub_state', 'shared');
+    
+    onSnapshot(sharedDocRef, (snapshot) => {
+      setOnlineStatus();
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        if(data) {
+          window.S.users = data.users || window.S.users || [];
+          window.S.vendors = data.vendors || window.S.vendors || [];
+          window.S.items = data.items || window.S.items || [];
+          window.S.orders = data.orders || window.S.orders || [];
+          window.S.complaints = data.complaints || window.S.complaints || [];
+          window.S.closedBatches = data.closedBatches || window.S.closedBatches || {};
+          if(window.render) window.render();
+        }
+      } else {
+        window.save();
+      }
+    }, (err) => {
+      console.warn("Firestore snapshot error:", err.message);
+      setOfflineStatus();
+    });
+  } catch(e) {
+    console.warn("Firestore initialization error:", e);
+    setOfflineStatus();
+  }
+}
+
+// RULE 3 COMPLIANT: Authenticate FIRST, then attach snapshot listeners
+async function startAuth() {
+  try {
+    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+      await signInWithCustomToken(auth, __initial_auth_token);
+    } else {
+      await signInAnonymously(auth);
+    }
+    initFirestoreSync();
+  } catch(e) {
+    console.warn("Auth failed, falling back to local mode:", e);
+    setOfflineStatus();
+  }
+}
+startAuth();
+
+// Pre-fill seed data if empty
+if(!window.S.vendors || !window.S.vendors.length){
+  const defaultVendorUser = {
+    id: 1001,
+    role: 'vendor',
+    name: 'Vikram Sengupta (Ratri Lead)',
+    email: 'vendor@iitkgp.ac.in',
+    phone: '9832145670',
+    hall: 'Radhakrishnan (RK) Hall'
+  };
+  window.S.users.push(defaultVendorUser);
+  window.S.vendors.push({
+    id: 'v1',
+    ownerId: 1001,
+    pocName: 'Vikram Sengupta',
+    name: 'Ratri Ruchigal',
+    type: 'Product',
+    cat: 'food',
+    fulfillMode: 'Delivery',
+    pickupSpot: '',
+    desc: 'Hot fresh midnight biryani & quick hall snacks delivered across campus.',
+    win: '11:00 PM - 3:00 AM (~25-35 min delivery)',
+    upi: 'ratriruchigal@okaxis',
+    phone: '9832145670'
+  });
+  window.S.items.push(
+    {id: 1, vid: 'v1', name: 'Midnight Chicken Biryani', price: 150, stock: 25, img: ''},
+    {id: 2, vid: 'v1', name: 'Special Masala Maggi', price: 50, stock: 40, img: ''},
+    {id: 3, vid: 'v1', name: 'Aloo Paratha with Amul Butter', price: 60, stock: 30, img: ''},
+    {id: 4, vid: 'v1', name: 'Cold Chocolate Cold Coffee', price: 70, stock: 15, img: ''}
+  );
+  window.save();
+}
+
+// Global UI State
+window.cur = 'landing';
+window.authMode = 'choice';
+window.role = window.S.session ? window.S.session.role : null;
+window.selectedCat = null;
+window.vtab = 'orders';
+window.custTab = 'all';
+window.vid = null;
+window.pay = 'COD';
+window.proof = '';
+window.payModalProof = '';
+window.activePayOid = null;
+window.newImg = '';
+window.lastOrder = null;
+window.cart = {vid: null, q: {}};
+
+window.nid = () => ++window.S.seq;
+window.me = () => window.S.users.find(u => window.S.session && String(u.id) === String(window.S.session.uid));
+
+window.mv = () => {
+  if(!window.S.session || window.S.session.role !== 'vendor') return null;
+  // Strictly return store owned by this specific user session
+  return window.S.vendors.find(v => String(v.ownerId) === String(window.S.session.uid)) || null;
+};
+
+window.$ = id => document.getElementById(id);
+window.esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+window.cartTotal = () => Object.entries(window.cart.q).reduce((s,[id,q]) => s + q * (window.S.items.find(i => String(i.id) === String(id)) || {price:0}).price, 0);
+window.badge = s => `<span class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-medium text-[10px] border border-indigo-500/30">${window.esc(s)}</span>`;
+window.opts = (arr, sel) => arr.map(h => `<option value="${window.esc(h)}" ${h===sel?'selected':''}>${window.esc(h)}</option>`).join('');
+
+window.calculateDistance = (locA, locB) => {
+  const p1 = window.CAMPUS_GRAPH[locA] || {x: 2.0, y: 2.0};
+  const p2 = window.CAMPUS_GRAPH[locB] || {x: 2.0, y: 2.0};
+  const dx = p1.x - p2.x;
+  const dy = p1.y - p2.y;
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
+window.solveCampusRoute = (startPoint, pendingLocations) => {
+  let unvisited = [...new Set(pendingLocations)];
+  let current = startPoint;
+  let route = [];
+  let totalKm = 0;
+
+  while(unvisited.length > 0) {
+    let nearestIdx = 0;
+    let minDist = Infinity;
+    for(let i = 0; i < unvisited.length; i++) {
+      let d = window.calculateDistance(current, unvisited[i]);
+      if(d < minDist) {
+        minDist = d;
+        nearestIdx = i;
+      }
+    }
+    const nextStop = unvisited.splice(nearestIdx, 1)[0];
+    const distLeg = window.calculateDistance(current, nextStop);
+    totalKm += distLeg;
+    const transitMin = Math.round((distLeg / 15) * 60) + 2;
+    route.push({
+      from: current,
+      to: nextStop,
+      distanceKm: distLeg.toFixed(2),
+      estMinutes: Math.max(3, transitMin)
+    });
+    current = nextStop;
+  }
+  return { route, totalKm: totalKm.toFixed(2) };
+};
+
+window.isOverdue = o => !o.paid && (Date.now() - (o.t || Date.now())) > (7 * 24 * 60 * 60 * 1000);
+
+window.daysAgo = t => {
+  const d = Math.floor((Date.now() - (t || Date.now())) / (1000 * 60 * 60 * 24));
+  return d === 0 ? 'Today' : `${d}d ago`;
+};
+
+window.toast = m => {
+  const t = window.$('toast');
+  if(!t) return;
+  t.innerHTML = `<i class="fa-solid fa-circle-info text-indigo-400"></i> <span>${m}</span>`;
+  t.style.opacity = 1;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.style.opacity = 0, 2600);
+};
+
+window.readImg = (f, max, cb) => {
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas');
+      c.width = im.width * k; c.height = im.height * k;
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+      cb(c.toDataURL('image/jpeg', 0.75));
+    };
+    im.src = r.result;
+  };
+  r.readAsDataURL(f);
+};
+
+window.go = v => { window.cur = v; window.render(); window.scrollTo(0,0); };
+
+window.render = () => {
+  const u = window.me();
+  const who = window.$('who');
+  if(who) {
+    who.innerHTML = u && window.S.session
+      ? `<span class="bg-slate-700/70 border border-slate-600 px-2 py-1 rounded-lg text-slate-300 flex items-center gap-1.5 font-medium"><i class="fa-regular fa-user text-indigo-400"></i> ${window.esc(u.name.split(' ')[0])} <span class="text-[10px] uppercase font-bold text-indigo-300">(${window.S.session.role})</span></span>`
+      : '';
+  }
+  const appEl = window.$('app');
+  if(appEl && window.V[window.cur]) {
+    appEl.innerHTML = window.V[window.cur]();
+  }
+};
+
+window.enter = () => {
+  if(window.role === 'customer') {
+    window.go('categories');
+  } else {
+    const vendorStore = window.mv();
+    if(vendorStore) {
+      window.go('vdash');
+    } else {
+      window.go('onboard');
+    }
+  }
+};
+
+window.showOrderTicket = orderId => {
+  const o = window.S.orders.find(x => String(x.id) === String(orderId));
+  if(!o) return;
+  const v = window.S.vendors.find(x => String(x.id) === String(o.vid)) || {
+    name: 'Campus Vendor',
+    pocName: 'Campus Lead',
+    phone: '9832145670',
+    win: '11:00 PM - 3:00 AM (~30 min)',
+    fulfillMode: 'Delivery',
+    pickupSpot: 'Tech Market'
+  };
+
+  const isPickup = v.fulfillMode === 'Pickup';
+  
+  window.$('receiptBody').innerHTML = `
+    <div class="flex justify-between items-center pb-2.5 border-b border-dashed border-slate-700">
+      <div>
+        <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Order ID</p>
+        <p class="font-mono font-bold text-sm text-indigo-300">${window.esc(o.id)}</p>
+      </div>
+      <div class="text-right">
+        <span class="inline-block px-2.5 py-1 text-[11px] rounded-lg font-bold ${o.status==='Delivered'?'bg-emerald-950 text-emerald-300 border border-emerald-700':'bg-indigo-950 text-indigo-300 border border-indigo-700'}">
+          ${window.esc(o.status)}
+        </span>
+      </div>
+    </div>
+
+    <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-700/80 space-y-2">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Store & POC Details</p>
+          <p class="font-bold text-white text-sm">${window.esc(v.name)}</p>
+        </div>
+        <span class="text-[10px] bg-slate-800 text-indigo-300 px-2 py-0.5 rounded font-medium border border-slate-700">${isPickup ? '🛍️ Self-Pickup Store' : '🚀 Delivery Store'}</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800 text-[11px]">
+        <div>
+          <span class="text-slate-400 block text-[10px]">Vendor POC:</span>
+          <span class="font-semibold text-emerald-300 flex items-center gap-1">
+            <i class="fa-solid fa-user-tie text-[10px]"></i> ${window.esc(v.pocName || v.name)}
+          </span>
+        </div>
+        <div>
+          <span class="text-slate-400 block text-[10px]">POC Phone:</span>
+          <a href="tel:${window.esc(v.phone || '9832145670')}" class="font-bold text-indigo-400 hover:text-indigo-300 underline flex items-center gap-1">
+            <i class="fa-solid fa-phone text-[10px]"></i> ${window.esc(v.phone || '9832145670')}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 bg-indigo-950/40 border border-indigo-800/40 p-2.5 rounded-xl">
+      <div class="text-amber-400 text-lg pl-1">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+      </div>
+      <div class="flex-1">
+        <p class="text-[10px] uppercase font-bold text-indigo-300">${isPickup ? 'Estimated Ready Time' : 'Approx Delivery Time'}</p>
+        <p class="font-semibold text-xs text-white">${window.esc(v.win || '11:00 PM - 3:00 AM (~30 min)')}</p>
+      </div>
+    </div>
+
+    <div class="space-y-1.5 py-1">
+      <p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Items</p>
+      ${o.lines.map(l => `
+        <div class="flex justify-between text-[11px] text-slate-300">
+          <span>${window.esc(l.name)} <span class="text-slate-500">× ${l.qty}</span></span>
+          <span class="font-mono font-medium">₹${l.qty * l.price}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="pt-2 border-t border-dashed border-slate-700 flex justify-between items-center text-[11px]">
+      <div>
+        <span class="text-slate-400 block text-[10px]">${isPickup ? 'Collect From' : 'Deliver to'}</span>
+        <span class="font-semibold text-white">${isPickup ? window.esc(v.pickupSpot || 'Vendor Location') : `${window.esc(o.hall)} • ${window.esc(o.room)}`}</span>
+      </div>
+      <div class="text-right">
+        <span class="text-slate-400 block text-[10px]">Total & Payment</span>
+        <span class="font-bold text-emerald-400">₹${o.total} (${o.paid ? 'Paid' : 'Unpaid'})</span>
+      </div>
+    </div>
+  `;
+  window.$('receiptModal').classList.remove('hidden');
+  window.$('receiptModal').classList.add('flex');
+};
+
+window.V = {
+landing: () => `
+  <div class="text-center space-y-2 pt-6 pb-2">
+    <div class="inline-flex items-center gap-1.5 bg-indigo-500/10 border border-indigo-500/30 px-3 py-1 rounded-full text-xs text-indigo-300 font-medium">
+      <i class="fa-solid fa-bolt-lightning text-amber-400"></i> IIT Kharagpur Student Ecosystem
+    </div>
+    <h2 class="text-2xl font-black tracking-tight text-white">Late-night food, crafts & student services</h2>
+    <p class="text-xs text-slate-400 max-w-xs mx-auto">Direct student-to-student commerce across all Halls of Residence, Labs & Academic Hubs.</p>
+  </div>
+
+  <div class="space-y-3 pt-2">
+    <button data-a="role" data-v="customer" class="w-full cd text-left hover:border-indigo-500 transition-all group cursor-pointer">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-lg group-hover:scale-105 transition-transform">
+            🛒
+          </div>
+          <div>
+            <b class="text-sm text-white block">I am a Customer</b>
+            <p class="text-xs text-slate-400">Order to your Hall, Nalanda, Main Bldg or Tech Market</p>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-indigo-400 transition-colors"></i>
+      </div>
+    </button>
+
+    <button data-a="role" data-v="vendor" class="w-full cd text-left hover:border-indigo-500 transition-all group cursor-pointer">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg group-hover:scale-105 transition-transform">
+            🧑‍🍳
+          </div>
+          <div>
+            <b class="text-sm text-white block">I am a Vendor / Business</b>
+            <p class="text-xs text-slate-400">Edit inventory, close orders & run optimal delivery route solver</p>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-purple-400 transition-colors"></i>
+      </div>
+    </button>
+  </div>
+`,
+
+auth: () => {
+  if(window.authMode === 'choice'){
+    return `
+    <button data-a="go" data-v="landing" class="b b2 mb-2 text-xs">
+      <i class="fa-solid fa-arrow-left"></i> Role Selection
+    </button>
+    <div class="cd text-center space-y-4 py-6">
+      <div class="w-12 h-12 mx-auto rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl">
+        ${window.role==='vendor'?'🧑‍🍳':'🛒'}
+      </div>
+      <div>
+        <h2 class="font-bold text-lg text-white">${window.role==='vendor'?'Vendor Partner Portal':'Student Customer Access'}</h2>
+        <p class="text-xs text-slate-400 mt-1">Sign in to access your dashboard or create a new profile.</p>
+      </div>
+      <div class="space-y-2 pt-2">
+        <button data-a="setAuthMode" data-v="login" class="b w-full py-3 text-xs uppercase tracking-wider font-bold">
+          <i class="fa-solid fa-right-to-bracket"></i> Log In to Existing Account
+        </button>
+        <button data-a="setAuthMode" data-v="signup" class="b b2 w-full py-3 text-xs uppercase tracking-wider font-bold">
+          <i class="fa-solid fa-user-plus"></i> Register as New ${window.role==='vendor'?'Vendor':'Student'}
+        </button>
+      </div>
+    </div>`;
+  }
+  
+  if(window.authMode === 'login'){
+    return `
+    <button data-a="setAuthMode" data-v="choice" class="b b2 mb-2 text-xs">
+      <i class="fa-solid fa-arrow-left"></i> Back
+    </button>
+    <div class="cd space-y-3">
+      <div>
+        <h2 class="font-bold text-lg text-white">Log In (${window.role==='vendor'?'Vendor':'Customer'})</h2>
+        <p class="text-xs text-slate-400">${window.role==='vendor'?'Opens your store dashboard directly':'Access orders, menus & delivery tickets'}</p>
+      </div>
+      
+      <div>
+        <label class="lb">KGP Email / Username</label>
+        <input id="l-user" class="in font-mono" value="${window.role==='vendor'?'vendor@iitkgp.ac.in':''}" placeholder="student@iitkgp.ac.in">
+      </div>
+      <div>
+        <label class="lb">Password</label>
+        <input id="l-pass" type="password" class="in" value="password123" placeholder="••••••••">
+      </div>
+      <button data-a="login" class="b w-full mt-4 py-3 text-xs uppercase tracking-wider font-bold">
+        <i class="fa-solid fa-right-to-bracket"></i> Enter ${window.role==='vendor'?'Store Dashboard':'Campus Marketplace'}
+      </button>
+    </div>`;
+  }
+
+  return `
+  <button data-a="setAuthMode" data-v="choice" class="b b2 mb-2 text-xs">
+    <i class="fa-solid fa-arrow-left"></i> Back
+  </button>
+  <div class="cd space-y-2">
+    <div>
+      <h2 class="font-bold text-lg text-white">New ${window.role==='vendor'?'Vendor Partner':'Student'} Account</h2>
+      <p class="text-xs text-slate-400">Instant registration with your KGP details</p>
+    </div>
+    <label class="lb">Full Name / POC Name</label>
+    <input id="a-name" class="in" placeholder="e.g. Rahul Verma">
+    <label class="lb">IIT KGP Email</label>
+    <input id="a-email" type="email" class="in font-mono" placeholder="user@iitkgp.ac.in">
+    <label class="lb">Password</label>
+    <input id="a-pass" type="password" class="in" placeholder="••••••••">
+    <label class="lb">Contact Phone Number</label>
+    <input id="a-phone" type="tel" class="in font-mono" placeholder="9876543210">
+    ${window.role==='customer'?`<label class="lb">Primary Campus Location / Hall</label><select id="a-hall" class="in">${window.opts(window.KGP_LOCATIONS)}</select>`:''}
+    <button data-a="auth" class="b w-full mt-4 py-3 text-xs uppercase tracking-wider font-bold">
+      Create Account & Continue
+    </button>
+  </div>`;
+},
+
+categories: () => `
+  <div class="flex justify-between items-center">
+    <div>
+      <h2 class="font-bold text-xl text-white">Select Category</h2>
+      <p class="text-xs text-slate-400">Available late-night services and micro-eats</p>
+    </div>
+    <div class="flex gap-1.5">
+      <button data-a="go" data-v="orders" class="b b2 text-xs">
+        <i class="fa-solid fa-box"></i> My Orders
+      </button>
+      <button data-a="logout" class="b b2 text-xs">
+        <i class="fa-solid fa-power-off"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-3 pt-2">
+    ${Object.entries(window.CAT).map(([k,n])=>{
+      const count = window.S.vendors.filter(v=>v.cat===k).length;
+      return `
+      <div data-a="pickCat" data-v="${k}" class="cd cursor-pointer hover:border-indigo-500 hover:bg-slate-800/80 text-center p-4 transition-all group">
+        <div class="text-3xl mb-1.5 group-hover:scale-110 transition-transform">${n.split(' ')[0]}</div>
+        <b class="text-sm text-white block">${n.split(' ').slice(1).join(' ')}</b>
+        <span class="inline-block mt-1 text-[10px] text-indigo-300 font-bold bg-indigo-950/70 px-2 py-0.5 rounded-full border border-indigo-800/50">
+          ${count} Active Vendor${count===1?'':'s'}
+        </span>
+      </div>`;
+    }).join('')}
+  </div>
+`,
+
+onboard: () => `
+  <button data-a="logout" class="b b2 mb-2 text-xs">
+    <i class="fa-solid fa-arrow-left"></i> Logout / Switch User
+  </button>
+  <div class="cd space-y-2">
+    <h2 class="font-bold text-lg text-white">Set Up Your Campus Store</h2>
+    <p class="text-xs text-slate-400">Create your business listing to start accepting orders from halls.</p>
+    
+    <label class="lb">Business Name</label>
+    <input id="o-name" class="in" placeholder="e.g. Patel Night Canteen">
+
+    <label class="lb">Vendor POC Name (Contact Person)</label>
+    <input id="o-poc" class="in" placeholder="e.g. Priya Sharma">
+
+    <label class="lb">Order Fulfillment Type</label>
+    <select id="o-fulfill" class="in" onchange="document.getElementById('pickup-addr-box').classList.toggle('hidden', this.value !== 'Pickup')">
+      <option value="Delivery">🚀 Direct Hall Delivery</option>
+      <option value="Pickup">🛍️ Customer Self-Pickup</option>
+    </select>
+
+    <div id="pickup-addr-box" class="hidden">
+      <label class="lb">Pickup Location / Address (Visible to Customers)</label>
+      <input id="o-pickup" class="in" placeholder="e.g. RP Hall Room B-102 or Tech Market Shop #4">
+    </div>
+
+    <label class="lb">Offering Type</label>
+    <select id="o-type" class="in">
+      <option>Product</option>
+      <option>Service</option>
+    </select>
+
+    <label class="lb">Category</label>
+    <select id="o-cat" class="in">
+      ${Object.entries(window.CAT).map(([k,n])=>`<option value="${k}">${n}</option>`).join('')}
+    </select>
+
+    <label class="lb">What do you offer? (Short Description)</label>
+    <input id="o-desc" class="in" placeholder="e.g. Delicious hot grilled sandwiches and shakes">
+
+    <label class="lb">Approx. Delivery / Ready Window (Visible to Students)</label>
+    <input id="o-win" class="in" placeholder="e.g. 11:30 PM - 3:30 AM (25-35 mins)">
+
+    <label class="lb">UPI ID for Payments</label>
+    <input id="o-upi" class="in font-mono" placeholder="yourid@okaxis">
+
+    <label class="lb">POC Phone Number (for WhatsApp/Calls)</label>
+    <input id="o-phone" class="in font-mono" placeholder="9876543210">
+
+    <button data-a="onboard" class="b w-full mt-4 py-3 text-xs uppercase tracking-wider font-bold">
+      <i class="fa-solid fa-shop"></i> Launch My Store
+    </button>
+  </div>
+`,
+
+vendors: () => {
+  const l = window.S.vendors.filter(v=>v.cat===window.selectedCat);
+  return `
+  <div class="flex justify-between items-center">
+    <button data-a="go" data-v="categories" class="b b2 text-xs">
+      <i class="fa-solid fa-arrow-left"></i> Categories
+    </button>
+    <button data-a="go" data-v="orders" class="b b2 text-xs">
+      <i class="fa-solid fa-box"></i> My Orders
+    </button>
+  </div>
+  
+  <div>
+    <h2 class="font-bold text-xl text-white">${window.CAT[window.selectedCat]}</h2>
+    <p class="text-xs text-slate-400">Select a vendor to browse menu & place orders</p>
+  </div>
+
+  <div class="space-y-3 pt-1">
+    ${l.map(v=>`
+      <div data-a="store" data-v="${v.id}" class="cd cursor-pointer hover:border-indigo-500 hover:bg-slate-800/80 transition-colors space-y-2 group">
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">${window.CAT[v.cat]} • ${window.esc(v.type)}</span>
+            <h3 class="font-bold text-base text-white group-hover:text-indigo-300 transition-colors">${window.esc(v.name)}</h3>
+          </div>
+          <span class="text-[10px] bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-slate-300 font-bold">
+            ${v.fulfillMode === 'Pickup' ? '🛍️ Self Pickup' : '🚀 Delivery'}
+          </span>
+        </div>
+
+        <p class="text-xs text-slate-400 line-clamp-2">${window.esc(v.desc)}</p>
+
+        <div class="pt-2 border-t border-slate-700/60 flex flex-wrap justify-between items-center text-[11px]">
+          <span class="text-amber-300 font-medium flex items-center gap-1">
+            <i class="fa-solid fa-clock text-[10px]"></i> ETA: ${window.esc(v.win)}
+          </span>
+          <span class="text-indigo-300 font-medium flex items-center gap-1">
+            <i class="fa-solid fa-phone text-[10px]"></i> POC: ${window.esc(v.pocName||v.name.split(' ')[0])}
+          </span>
+        </div>
+      </div>
+    `).join('') || '<p class="text-center text-xs text-slate-500 py-8">No vendors currently registered in this category.</p>'}
+  </div>`;
+},
+
+store: () => {
+  const v = window.S.vendors.find(x => String(x.id) === String(window.vid));
+  if(!v) return `<div class="cd text-center">Vendor not found <button data-a="go" data-v="vendors" class="b mt-2">Back</button></div>`;
+  const items = window.S.items.filter(i => String(i.vid) === String(window.vid));
+  const n = Object.values(window.cart.q).reduce((a,b)=>a+b,0);
+  
+  return `
+  <button data-a="go" data-v="vendors" class="b b2 text-xs mb-2">
+    <i class="fa-solid fa-arrow-left"></i> Back to Vendors
+  </button>
+  
+  <div class="cd space-y-2 border-indigo-500/30">
+    <div class="flex justify-between items-start">
+      <div>
+        <h2 class="font-extrabold text-lg text-white">${window.esc(v.name)}</h2>
+        <p class="text-xs text-slate-400 mt-0.5">${window.esc(v.desc)}</p>
+      </div>
+      <span class="text-[10px] bg-indigo-950 text-indigo-300 px-2 py-1 rounded font-bold border border-indigo-800">
+        ${v.fulfillMode === 'Pickup' ? '🛍️ Self Pickup' : '🚀 Delivery'}
+      </span>
+    </div>
+
+    ${v.fulfillMode === 'Pickup' ? `
+      <div class="bg-amber-950/40 border border-amber-800/50 p-2.5 rounded-xl text-xs text-amber-200 space-y-1">
+        <p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-amber-400"></i> Pickup Spot / Address:</p>
+        <p class="text-slate-200 font-mono pl-5">${window.esc(v.pickupSpot || 'Vendor Location')}</p>
+      </div>
+    ` : ''}
+
+    <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700/80 flex flex-wrap justify-between items-center text-xs gap-2">
+      <div class="flex items-center gap-1.5 text-slate-300">
+        <i class="fa-solid fa-user-check text-emerald-400 text-xs"></i>
+        <span>POC: <b class="text-white">${window.esc(v.pocName || 'Vendor Manager')}</b></span>
+      </div>
+      <a href="tel:${window.esc(v.phone || '9832145670')}" class="text-indigo-300 hover:text-indigo-200 font-bold flex items-center gap-1 text-[11px] bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
+        <i class="fa-solid fa-phone text-emerald-400 text-[10px]"></i> ${window.esc(v.phone || '9832145670')}
+      </a>
+    </div>
+
+    <div class="text-[11px] text-amber-300 flex items-center gap-1.5 pt-0.5">
+      <i class="fa-regular fa-clock"></i>
+      <span>Estimated ${v.fulfillMode === 'Pickup' ? 'Ready Time' : 'Delivery'}: <b>${window.esc(v.win)}</b></span>
+    </div>
+  </div>
+
+  <div class="space-y-2 pt-2">
+    <p class="hd">Menu & Available Offerings</p>
+    ${items.map(i=>{
+      const q = window.cart.q[i.id] || 0;
+      return `
+      <div class="cd flex gap-3 items-center justify-between py-3">
+        <div class="flex-1">
+          <b class="text-sm text-white">${window.esc(i.name)}</b>
+          <p class="text-xs text-slate-400 mt-0.5">
+            <span class="text-emerald-400 font-bold text-sm font-mono">₹${i.price}</span> 
+            <span class="mx-1">•</span> 
+            <span class="${i.stock>0?'text-slate-400':'text-rose-400 font-semibold'}">${i.stock>0?i.stock+' available':'Sold out'}</span>
+          </p>
+        </div>
+        ${i.stock>0?`
+          <div class="flex items-center gap-2 bg-slate-900 border border-slate-700 p-1 rounded-xl">
+            <button data-a="qty" data-v="${i.id}:-1" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center justify-center font-bold text-xs">-</button>
+            <span class="w-5 text-center font-bold text-xs text-white">${q}</span>
+            <button data-a="qty" data-v="${i.id}:1" class="w-7 h-7 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 flex items-center justify-center font-bold text-xs">+</button>
+          </div>
+        `:''}
+      </div>`;
+    }).join('') || '<p class="text-xs text-slate-500 text-center py-6">No items listed yet.</p>'}
+  </div>
+
+  ${n>0?`
+    <div class="sticky bottom-4 bg-indigo-600 border border-indigo-400/30 rounded-2xl p-3.5 flex justify-between items-center shadow-2xl backdrop-blur-md">
+      <div>
+        <p class="text-[11px] text-indigo-100">${n} item${n===1?'':'s'} chosen</p>
+        <b class="text-white text-base font-mono">Total: ₹${window.cartTotal()}</b>
+      </div>
+      <button data-a="checkout" class="b bg-white text-indigo-700 hover:bg-indigo-50 font-bold px-4 py-2 text-xs">
+        Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  `:''}
+  `;
+},
+
+checkout: () => {
+  const u = window.me();
+  const v = window.S.vendors.find(x => String(x.id) === String(window.vid));
+  if(!v) return `<div class="cd">Vendor not found <button data-a="go" data-v="vendors" class="b mt-2">Back</button></div>`;
+
+  const isPickup = v.fulfillMode === 'Pickup';
+
+  const rows = Object.entries(window.cart.q).map(([id,q])=>{
+    const i = window.S.items.find(x => String(x.id) === String(id));
+    return `
+    <div class="flex justify-between text-xs py-1">
+      <span class="text-slate-300">${window.esc(i.name)} × ${q}</span>
+      <span class="font-mono font-semibold text-white">₹${q*i.price}</span>
+    </div>`;
+  }).join('');
+
+  const upiUrl = `upi://pay?pa=${encodeURIComponent(v.upi||'ratriruchigal@okaxis')}&pn=${encodeURIComponent(v.name)}&am=${window.cartTotal()}&cu=INR`;
+
+  return `
+  <button data-a="go" data-v="store" class="b b2 text-xs mb-2">
+    <i class="fa-solid fa-arrow-left"></i> Back to Menu
+  </button>
+
+  <div class="cd space-y-2">
+    <p class="hd">Order Summary</p>
+    <div class="divide-y divide-slate-700/60">${rows}</div>
+    <div class="flex justify-between font-bold border-t border-slate-700 pt-2 text-sm">
+      <span class="text-white">Amount Due</span>
+      <span class="text-emerald-400 font-mono">₹${window.cartTotal()}</span>
+    </div>
+  </div>
+
+  <div class="cd space-y-2">
+    <p class="hd">${isPickup ? 'Pickup Information' : 'Campus Delivery Destination'}</p>
+    <label class="lb">Full Name</label>
+    <input id="c-name" class="in" value="${window.esc(u ? u.name : '')}">
+    
+    ${isPickup ? `
+      <div class="bg-amber-950/40 p-3 rounded-xl border border-amber-700/50 space-y-1 text-xs">
+        <p class="font-bold text-amber-300 flex items-center gap-1.5"><i class="fa-solid fa-shop"></i> Self-Pickup Order:</p>
+        <p class="text-slate-200">Collect your order directly from:</p>
+        <p class="font-mono font-bold text-white bg-slate-900 p-2 rounded border border-slate-700">${window.esc(v.pickupSpot || 'Vendor Store Location')}</p>
+      </div>
+      <input type="hidden" id="c-hall" value="${window.esc(v.pickupSpot || 'Self-Pickup')}">
+      <input type="hidden" id="c-room" value="Self-Pickup">
+    ` : `
+      <label class="lb">Select KGP Location (Hall / Dept / Landmark)</label>
+      <select id="c-hall" class="in font-medium text-xs">
+        ${window.opts(window.KGP_LOCATIONS, u ? u.hall : 'Radhakrishnan (RK) Hall')}
+      </select>
+
+      <label class="lb">Room / Lab / Specific Spot</label>
+      <input id="c-room" class="in" placeholder="e.g. C-214, Ground Floor Foyer, Lab 202">
+    `}
+    
+    <label class="lb">Contact Phone</label>
+    <input id="c-phone" class="in font-mono" type="tel" value="${window.esc(u ? u.phone : '')}">
+  </div>
+
+  <div class="cd space-y-2">
+    <p class="hd">Payment Method</p>
+    <div class="flex gap-2">
+      <button id="pb-COD" data-a="pay" data-v="COD" class="b flex-1 py-2 text-xs">
+        <i class="fa-solid fa-hand-holding-dollar"></i> ${isPickup ? 'Pay at Pickup' : 'Cash on Delivery'}
+      </button>
+      <button id="pb-UPI" data-a="pay" data-v="UPI" class="b b2 flex-1 py-2 text-xs">
+        <i class="fa-solid fa-qrcode"></i> UPI Instant Pay
+      </button>
+    </div>
+
+    <div id="upi" class="hidden mt-3 space-y-2 text-xs text-center bg-slate-900/90 p-3 rounded-xl border border-slate-700">
+      <p class="text-slate-300">Scan & pay <b class="text-emerald-400 font-mono">₹${window.cartTotal()}</b> to <b class="text-indigo-300 font-mono">${window.esc(v.upi||'ratriruchigal@okaxis')}</b></p>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(upiUrl)}" class="w-24 h-24 mx-auto rounded border border-slate-700 my-1">
+      <a href="${upiUrl}" class="b inline-block text-[11px] py-1 px-3">Open UPI App</a>
+      <label class="lb text-left">Upload Screenshot Proof</label>
+      <input type="file" accept="image/*" data-c="proof" class="text-xs w-full text-slate-400">
+    </div>
+  </div>
+
+  <button data-a="place" class="b w-full py-3.5 text-xs font-bold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 shadow-lg">
+    <i class="fa-solid fa-lock"></i> Confirm Order
+  </button>
+  `;
+},
+
+orders: () => {
+  const allUserOrders = window.S.orders.filter(o => window.S.session && String(o.uid) === String(window.S.session.uid));
+  let l = allUserOrders;
+  if(window.custTab==='active') l = allUserOrders.filter(o=>o.status!=='Delivered');
+  if(window.custTab==='unpaid') l = allUserOrders.filter(o=>!o.paid);
+  if(window.custTab==='paid') l = allUserOrders.filter(o=>o.paid);
+  if(window.custTab==='past') l = allUserOrders.filter(o=>o.status==='Delivered');
+
+  const deliveredCount = allUserOrders.filter(o=>o.status==='Delivered').length;
+
+  return `
+  <div class="flex justify-between items-center">
+    <div>
+      <h2 class="font-bold text-xl text-white">My Order History</h2>
+      <p class="text-xs text-slate-400">View deliveries, track POCs and access tickets</p>
+    </div>
+    <button data-a="go" data-v="categories" class="b b2 text-xs">
+      <i class="fa-solid fa-arrow-left"></i> Stores
+    </button>
+  </div>
+
+  <div class="flex gap-1 bg-slate-800/80 p-1 rounded-xl overflow-x-auto text-xs">
+    <button data-a="custFilter" data-v="all" class="b ${window.custTab==='all'?'':'b2'} py-1.5 px-3">All (${allUserOrders.length})</button>
+    <button data-a="custFilter" data-v="active" class="b ${window.custTab==='active'?'':'b2'} py-1.5 px-3">Active</button>
+    <button data-a="custFilter" data-v="unpaid" class="b ${window.custTab==='unpaid'?'':'b2'} py-1.5 px-3 text-amber-400">Unpaid</button>
+    <button data-a="custFilter" data-v="paid" class="b ${window.custTab==='paid'?'':'b2'} py-1.5 px-3 text-emerald-400">Paid</button>
+    <button data-a="custFilter" data-v="past" class="b ${window.custTab==='past'?'':'b2'} py-1.5 px-3 text-purple-300">Past (${deliveredCount})</button>
+  </div>
+
+  <div class="space-y-3 pt-1">
+    ${l.map(o=>{
+      const v = window.S.vendors.find(x=>String(x.id)===String(o.vid));
+      return `
+      <div class="cd text-xs space-y-2 border-slate-700">
+        <div class="flex justify-between items-start">
+          <div>
+            <b class="text-indigo-300 font-mono text-sm">${o.id}</b>
+            <p class="text-[10px] text-slate-400">${window.daysAgo(o.t)} • ${window.esc(v?v.name:'Vendor')}</p>
+          </div>
+          <div>${window.badge(o.status)}</div>
+        </div>
+
+        <p class="font-semibold text-white text-xs">${o.lines.map(x=>window.esc(x.name)+' ×'+x.qty).join(', ')}</p>
+
+        <div class="bg-slate-900/60 p-2 rounded-lg text-[11px] text-slate-300 border border-slate-800">
+          📍 <span class="text-white font-medium">${window.esc(o.hall)}</span> ${o.room !== 'Self-Pickup' ? `(${window.esc(o.room)})` : ''}
+        </div>
+
+        <div class="flex justify-between items-center text-[11px] pt-1">
+          <span class="text-slate-400">Total: <b class="text-white font-mono">₹${o.total}</b></span>
+          <span class="${o.paid?'text-emerald-400':'text-amber-400'} font-semibold">
+            ${o.paid?'● Paid':'○ Unpaid ('+o.method+')'}
+          </span>
+        </div>
+
+        <div class="flex gap-2 pt-2 border-t border-slate-700/60">
+          <button data-a="viewTicket" data-v="${o.id}" class="b b2 flex-1 text-xs py-1.5 text-indigo-300 hover:text-white border-indigo-500/40">
+            🎟️ View Order Ticket
+          </button>
+          ${!o.paid ? `
+            <button data-a="openPayModal" data-v="${o.id}" class="b flex-1 text-xs py-1.5 bg-emerald-600 hover:bg-emerald-500">
+              <i class="fa-solid fa-credit-card"></i> Pay Now
+            </button>
+          ` : ''}
+        </div>
+      </div>`;
+    }).join('') || '<p class="text-center text-xs text-slate-500 py-8">No orders found under this filter.</p>'}
+  </div>
+
+  <div class="cd space-y-2 mt-6">
+    <p class="hd">Report an Issue with an Order</p>
+    <label class="lb">Select Order ID</label>
+    <select id="iss-oid" class="in font-mono">
+      ${allUserOrders.map(o=>`<option value="${o.id}">${o.id} - ₹${o.total} (${o.lines[0]?.name||'Order'})</option>`).join('') || '<option value="">No past orders</option>'}
+    </select>
+    <label class="lb">Describe the Issue</label>
+    <input id="iss-txt" class="in" placeholder="e.g. Delayed delivery or wrong item...">
+    <button data-a="submitIssue" class="b w-full mt-2 py-2 text-xs">
+      Submit Issue Ticket to Vendor
+    </button>
+  </div>
+  `;
+},
+
+vdash: () => {
+  const v = window.mv();
+  if(!v) return `
+    <div class="cd text-center space-y-3 py-8">
+      <p class="text-sm text-slate-400">Vendor store profile not found.</p>
+      <button data-a="go" data-v="onboard" class="b">Create Business Store</button>
+    </div>`;
+
+  const open = window.S.complaints.filter(c => String(c.vid) === String(v.id) && c.open).length;
+  const tabs = [
+    ['orders', '<i class="fa-solid fa-list-check"></i> Orders'],
+    ['menu', '<i class="fa-solid fa-utensils"></i> Menu'],
+    ['route', '<i class="fa-solid fa-route"></i> Route Engine'],
+    ['issues', `<i class="fa-solid fa-triangle-exclamation"></i> Issues${open?' ('+open+')':''}`]
+  ];
+
+  return `
+  <div class="flex justify-between items-start">
+    <div>
+      <div class="flex items-center gap-2">
+        <h2 class="font-extrabold text-xl text-white">${window.esc(v.name)}</h2>
+        <span class="text-[10px] bg-indigo-950 text-indigo-300 px-2 py-0.5 rounded font-bold border border-indigo-800">
+          ${window.CAT[v.cat]}
+        </span>
+      </div>
+      <p class="text-xs text-slate-400 mt-0.5">
+        POC: <span class="text-emerald-300 font-semibold">${window.esc(v.pocName||'Manager')}</span> • 
+        Phone: <span class="text-indigo-300 font-mono">${window.esc(v.phone)}</span>
+      </p>
+    </div>
+    <button data-a="logout" class="b b2 text-xs">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+    </button>
+  </div>
+
+  <div class="grid grid-cols-4 gap-1 bg-slate-800/80 p-1 rounded-2xl text-xs">
+    ${tabs.map(([k,n])=>`
+      <button data-a="tab" data-v="${k}" class="b ${window.vtab===k?'':'b2'} py-2 px-1 text-[11px]">
+        ${n}
+      </button>
+    `).join('')}
+  </div>
+
+  ${window.T[window.vtab](v)}
+  `;
+}
+};
+
+window.T = {
+orders: v => {
+  let l = window.S.orders.filter(o => String(o.vid) === String(v.id));
+  let p = l.filter(o => o.paid).length;
+  const overdueList = l.filter(o => window.isOverdue(o));
+  const isPickupVendor = v.fulfillMode === 'Pickup';
+
+  return `
+  <div class="cd p-3 border-indigo-500/30 bg-slate-900/90 flex flex-wrap justify-between items-center gap-2">
+    <div>
+      <h4 class="font-bold text-xs text-white flex items-center gap-1.5">
+        <i class="fa-solid fa-file-excel text-emerald-400"></i> Order History Exports
+      </h4>
+      <p class="text-[10px] text-slate-400">Download spreadsheet or email complete order ledger</p>
+    </div>
+    <div class="flex gap-2 w-full sm:w-auto">
+      <button data-a="exportExcel" class="b flex-1 sm:flex-none text-[11px] py-1.5 px-3 bg-emerald-700 hover:bg-emerald-600 font-bold">
+        <i class="fa-solid fa-download"></i> Download Excel (.csv)
+      </button>
+      <button data-a="openEmailModal" class="b b2 flex-1 sm:flex-none text-[11px] py-1.5 px-3 hover:border-indigo-400">
+        <i class="fa-solid fa-envelope"></i> Email Report
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-4 gap-1.5 text-center">
+    <div class="cd p-2">
+      <p class="text-[10px] text-slate-400">Total</p>
+      <b class="text-base text-white font-mono">${l.length}</b>
+    </div>
+    <div class="cd p-2">
+      <p class="text-[10px] text-emerald-300">Paid</p>
+      <b class="text-base text-emerald-400 font-mono">${p}</b>
+    </div>
+    <div class="cd p-2">
+      <p class="text-[10px] text-amber-300">Unpaid</p>
+      <b class="text-base text-amber-400 font-mono">${l.length-p}</b>
+    </div>
+    <div class="cd p-2">
+      <p class="text-[10px] text-rose-300">Overdue</p>
+      <b class="text-base text-rose-400 font-mono">${overdueList.length}</b>
+    </div>
+  </div>
+
+  <div class="space-y-3 pt-1">
+    ${l.map(o=>{
+      const od = window.isOverdue(o);
+      return `
+      <div class="cd text-xs space-y-2 ${od?'border-rose-500 bg-rose-950/20':''}">
+        <div class="flex justify-between items-start">
+          <div>
+            <b class="text-indigo-300 font-mono text-sm">${o.id}</b>
+            <p class="text-[10px] text-slate-400">${window.daysAgo(o.t)}</p>
+          </div>
+          <div>
+            ${od ? `<span class="badge-overdue">🚨 OVERDUE (>7D)</span>` : `<span class="${o.paid?'text-emerald-400':'text-amber-400'} font-semibold text-[11px]">${o.paid?'● Paid':'○ Unpaid ('+o.method+')'}</span>`}
+          </div>
+        </div>
+
+        <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700/60">
+          <p class="text-xs font-bold text-white flex items-center justify-between">
+            <span>${window.esc(o.name)}</span>
+            <span class="text-indigo-300 font-medium text-[11px]">📍 ${window.esc(o.hall)}</span>
+          </p>
+          <p class="text-[11px] text-slate-400">Spot/Room: <span class="text-slate-200 font-medium">${window.esc(o.room)}</span></p>
+          <p class="text-slate-300 text-[11px] mt-1">📦 ${o.lines.map(x=>window.esc(x.name)+' ×'+x.qty).join(', ')}</p>
+          <p class="text-[11px] text-slate-400 mt-1">
+            📞 Phone: <a href="tel:${window.esc(o.phone)}" class="text-indigo-400 underline font-mono">${window.esc(o.phone)}</a>
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-1.5 items-center pt-2 border-t border-slate-700/60">
+          <b class="text-emerald-400 text-sm font-mono mr-auto">₹${o.total}</b>
+          <button data-a="viewTicket" data-v="${o.id}" class="b b2 text-[10px] py-1 px-2 text-indigo-300">
+            🎟️ Ticket
+          </button>
+          <select data-c="status" data-v="${o.id}" class="in text-xs py-1 px-2" style="width:auto">
+            ${window.opts(window.STAT,o.status)}
+          </select>
+          <button data-a="paid" data-v="${o.id}" class="b b2 text-[10px] py-1 px-2.5">
+            ${o.paid?'Mark Unpaid':'Mark Paid'}
+          </button>
+          
+          ${isPickupVendor ? `
+            <button data-a="alertReady" data-v="${o.id}" class="b text-[10px] py-1 px-2.5 bg-amber-600 hover:bg-amber-500 font-bold">
+              <i class="fa-solid fa-bell"></i> Alert Ready for Pickup
+            </button>
+          ` : `
+            ${!o.paid ? `
+              <button data-a="waAlert" data-v="${o.id}" class="b text-[10px] py-1 px-2.5 bg-emerald-600 hover:bg-emerald-500">
+                <i class="fa-brands fa-whatsapp"></i> Alert
+              </button>
+            ` : ''}
+          `}
+          
+          ${o.proof?`<button data-a="proof" data-v="${o.id}" class="b b2 text-[10px] py-1 px-2">Proof</button>`:''}
+        </div>
+      </div>`;
+    }).join('') || '<p class="text-center text-xs text-slate-500 py-8">No customer orders placed yet.</p>'}
+  </div>`;
+},
+
+menu: v => `
+  <div class="cd space-y-2">
+    <p class="hd">Delivery/Pickup Window (Visible to Customers)</p>
+    <div class="flex gap-2">
+      <input class="in text-xs" data-c="win" value="${window.esc(v.win)}">
+      <button class="b text-xs whitespace-nowrap" onclick="window.toast('ETA window updated!')">Update ETA</button>
+    </div>
+  </div>
+
+  <div class="cd space-y-2">
+    <p class="hd">Add New Menu Offering</p>
+    <input id="n-name" class="in" placeholder="Item Name, e.g. Paneer Roll">
+    <div class="grid grid-cols-2 gap-2">
+      <input id="n-price" type="number" class="in" placeholder="Price (₹)">
+      <input id="n-stock" type="number" class="in" placeholder="Available Quantity">
+    </div>
+    <label class="lb text-[10px]">Optional Item Photo</label>
+    <input type="file" accept="image/*" data-c="img" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:bg-slate-700 file:text-slate-200">
+    <button data-a="add" class="b w-full mt-2 py-2.5 text-xs">
+      <i class="fa-solid fa-plus"></i> Add Item to Store Menu
+    </button>
+  </div>
+
+  <div class="space-y-2 pt-1">
+    <div class="flex justify-between items-center">
+      <p class="hd mb-0">Active Inventory (${window.S.items.filter(i => String(i.vid) === String(v.id)).length})</p>
+    </div>
+
+    ${window.S.items.filter(i => String(i.vid) === String(v.id)).map(i => `
+      <div class="cd flex gap-3 items-center text-xs py-2.5">
+        ${i.img?`<img src="${i.img}" alt="" class="w-12 h-12 rounded-xl object-cover border border-slate-700">`:''}
+        <div class="flex-1">
+          <b class="text-white text-sm">${window.esc(i.name)}</b>
+          <p class="text-slate-400 font-mono mt-0.5">₹${i.price} • Stock: <span class="font-bold ${i.stock>0?'text-emerald-400':'text-rose-400'}">${i.stock}</span></p>
+        </div>
+        <button data-a="openEditItem" data-v="${i.id}" class="b b2 text-[11px] py-1.5 px-3 hover:border-indigo-400">
+          <i class="fa-solid fa-pen text-[10px]"></i> Edit
+        </button>
+        <button data-a="openDeleteItem" data-v="${i.id}" class="b text-[11px] py-1.5 px-3 bg-rose-950 text-rose-300 border border-rose-800 hover:bg-rose-900">
+          <i class="fa-solid fa-trash-can text-[10px]"></i> Delete
+        </button>
+      </div>
+    `).join('') || '<p class="text-xs text-slate-500 text-center py-4">No menu items yet.</p>'}
+  </div>
+`,
+
+route: v => {
+  const pendingOrders = window.S.orders.filter(o => String(o.vid) === String(v.id) && o.status !== 'Delivered');
+  const uniqueLocations = [...new Set(pendingOrders.map(o => o.hall))];
+  
+  const startHub = 'IIT KGP Main Gate';
+  const optimized = window.solveCampusRoute(startHub, uniqueLocations);
+  
+  const prepList = {};
+  pendingOrders.forEach(o => {
+    o.lines.forEach(l => {
+      prepList[l.name] = (prepList[l.name] || 0) + l.qty;
+    });
+  });
+
+  const batchKey = 'batch_' + v.id;
+  const isBatchLocked = window.S.closedBatches[batchKey];
+
+  return `
+  <div class="cd space-y-3 border-indigo-500/40 bg-gradient-to-br from-slate-900 to-indigo-950/40">
+    <div class="flex justify-between items-start">
+      <div>
+        <h3 class="font-extrabold text-base text-white flex items-center gap-2">
+          <i class="fa-solid fa-map-location-dot text-indigo-400"></i> Campus Route & Dispatch Solver
+        </h3>
+        <p class="text-xs text-slate-400 mt-0.5">Calculates optimal delivery sequence starting from <b>IIT KGP Main Gate</b></p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+      <div class="bg-slate-900/90 p-2 rounded-xl border border-slate-800">
+        <p class="text-[10px] text-slate-400">Delivery Stops</p>
+        <b class="text-sm text-indigo-300">${uniqueLocations.length}</b>
+      </div>
+      <div class="bg-slate-900/90 p-2 rounded-xl border border-slate-800">
+        <p class="text-[10px] text-slate-400">Total Route</p>
+        <b class="text-sm text-emerald-400">${optimized.totalKm} km</b>
+      </div>
+      <div class="bg-slate-900/90 p-2 rounded-xl border border-slate-800">
+        <p class="text-[10px] text-slate-400">Active Parcels</p>
+        <b class="text-sm text-amber-300">${pendingOrders.length}</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="cd space-y-2">
+    <p class="hd">Kitchen Prep Checklist</p>
+    <div class="space-y-1">
+      ${Object.entries(prepList).map(([name, qty]) => `
+        <div class="flex justify-between items-center text-xs py-1.5 border-b border-slate-800">
+          <span class="text-slate-300 font-medium">${window.esc(name)}</span>
+          <span class="font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-800 px-2.5 py-0.5 rounded">
+            × ${qty}
+          </span>
+        </div>
+      `).join('') || '<p class="text-xs text-slate-500">No items need preparing right now.</p>'}
+    </div>
+  </div>`;
+},
+
+issues: v => {
+  const l = window.S.complaints.filter(c => String(c.vid) === String(v.id));
+  return `
+  <div class="space-y-2 pt-1">
+    ${l.map(c=>`
+      <div class="cd text-xs space-y-2 border-slate-700">
+        <div class="flex justify-between items-center">
+          <b class="text-indigo-300 font-mono">${window.esc(c.oid)}</b>
+          <span class="${c.open?'text-amber-400 bg-amber-950/40 border border-amber-800':'text-emerald-400 bg-emerald-950/40 border border-emerald-800'} px-2 py-0.5 rounded text-[10px] font-bold">
+            ${c.open?'Action Required':'Resolved'}
+          </span>
+        </div>
+        <p class="text-sm text-white">${window.esc(c.text)}</p>
+        <p class="text-slate-400 text-[11px]">Submitted by: <b class="text-slate-300">${window.esc(c.name)}</b></p>
+        ${c.open?`
+          <button data-a="resolve" data-v="${c.id}" class="b b2 text-xs py-1.5 w-full text-emerald-300 hover:bg-emerald-950">
+            <i class="fa-solid fa-check"></i> Mark Ticket as Resolved
+          </button>
+        `:''}
+      </div>
+    `).join('') || '<p class="text-center text-xs text-slate-500 py-8">No customer complaints!</p>'}
+  </div>`;
+}
+};
+
+window.A = {
+go: v => window.go(v),
+role: r => { window.role=r; window.authMode='choice'; if(window.S.session&&window.S.session.role===r) window.enter(); else window.go('auth'); },
+setAuthMode: m => { window.authMode=m; window.render(); },
+
+login: () => {
+  const user = window.$('l-user').value.trim().toLowerCase();
+  const pass = window.$('l-pass').value.trim();
+  if(!user || !pass) return window.toast('Please enter email/username and password');
+
+  let u = window.S.users.find(x => x.email === user && x.role === window.role);
+  if(!u){
+    u = {
+      id: window.nid(),
+      role: window.role,
+      name: user.split('@')[0] || 'User',
+      email: user,
+      phone: '9832145670',
+      hall: 'Radhakrishnan (RK) Hall'
+    };
+    window.S.users.push(u);
+  }
+
+  window.S.session = { uid: u.id, role: window.role };
+  window.save();
+  window.enter();
+},
+
+auth: () => {
+  const name = window.$('a-name') ? window.$('a-name').value.trim() : '';
+  const email = window.$('a-email') ? window.$('a-email').value.trim().toLowerCase() : '';
+  const phone = window.$('a-phone') ? window.$('a-phone').value.trim() : '';
+  const hallEl = window.$('a-hall');
+  const hall = (window.role === 'customer' && hallEl) ? hallEl.value : '';
+
+  if(!name || !email.includes('@') || phone.length < 8) {
+    return window.toast('Enter your full name, valid KGP email, and phone number');
+  }
+
+  let u = window.S.users.find(x => x.email === email && x.role === window.role);
+  if(u){
+    u.name = name;
+    u.phone = phone;
+    if(hall) u.hall = hall;
+  } else {
+    u = {id: window.nid(), role: window.role, name, email, phone, hall};
+    window.S.users.push(u);
+  }
+
+  window.S.session = {uid: u.id, role: window.role};
+  window.save();
+  window.enter();
+},
+
+onboard: () => {
+  const name = window.$('o-name').value.trim();
+  const pocName = window.$('o-poc').value.trim();
+  const fulfillMode = window.$('o-fulfill').value;
+  const pickupSpot = window.$('o-pickup') ? window.$('o-pickup').value.trim() : '';
+  const desc = window.$('o-desc').value.trim();
+  const phone = window.$('o-phone').value.trim();
+  const win = window.$('o-win').value.trim();
+
+  if(!name || !desc) return window.toast('Please provide your business name and offering');
+
+  const me = window.me();
+  const newVendor = {
+    id: 'v' + window.nid(),
+    ownerId: window.S.session.uid,
+    pocName: pocName || (me ? me.name : 'Store POC'),
+    name,
+    type: window.$('o-type').value,
+    cat: window.$('o-cat').value,
+    fulfillMode: fulfillMode || 'Delivery',
+    pickupSpot: pickupSpot || '',
+    desc,
+    win: win || '11:00 PM - 3:00 AM (~30 min)',
+    upi: window.$('o-upi').value.trim() || 'ratriruchigal@okaxis',
+    phone: phone || '9832145670'
+  };
+
+  window.S.vendors.push(newVendor);
+  window.save();
+  window.go('vdash');
+},
+
+logout: () => {
+  window.S.session = null;
+  window.role = null;
+  window.authMode = 'choice';
+  window.save();
+  window.go('landing');
+},
+
+pickCat: k => { window.selectedCat=k; window.go('vendors'); },
+custFilter: v => { window.custTab=v; window.render(); },
+store: id => { if(window.cart.vid!==id) window.cart={vid:id,q:{}}; window.vid=id; window.go('store'); },
+
+qty: v => {
+  const [id,d] = v.split(':'), i = window.S.items.find(x => String(x.id) === String(id));
+  const n = (window.cart.q[id]||0) + Number(d);
+  if(n > i.stock) return window.toast('Only '+i.stock+' available in stock');
+  if(n <= 0) delete window.cart.q[id]; else window.cart.q[id] = n;
+  window.render();
+},
+
+checkout: () => {
+  if(!Object.keys(window.cart.q).length) return;
+  window.pay = 'COD';
+  window.proof = '';
+  window.go('checkout');
+},
+
+pay: m => {
+  window.pay = m;
+  ['COD','UPI'].forEach(k => {
+    const el = window.$('pb-'+k);
+    if(el) el.className = 'b flex-1 ' + (k===m ? '' : 'b2');
+  });
+  const upiEl = window.$('upi');
+  if(upiEl) upiEl.classList.toggle('hidden', m !== 'UPI');
+},
+
+place: () => {
+  const name = window.$('c-name').value.trim();
+  const room = window.$('c-room').value.trim();
+  const phone = window.$('c-phone').value.trim();
+  const hall = window.$('c-hall').value;
+
+  if(!name || !room || !phone) return window.toast('Please enter your details');
+  if(window.pay === 'UPI' && !window.proof) return window.toast('Please attach your UPI transaction screenshot');
+
+  const lines = Object.entries(window.cart.q).map(([id,q]) => {
+    const i = window.S.items.find(x => String(x.id) === String(id));
+    return {id:i.id, name:i.name, qty:q, price:i.price};
+  });
+
+  lines.forEach(l => {
+    const item = window.S.items.find(x => String(x.id) === String(l.id));
+    if(item) item.stock -= l.qty;
+  });
+
+  const o = {
+    id: 'KGP-' + window.nid(),
+    uid: window.S.session.uid,
+    vid: window.vid,
+    name,
+    hall,
+    room,
+    phone,
+    lines,
+    total: window.cartTotal(),
+    method: window.pay,
+    paid: window.pay === 'UPI',
+    proof: window.pay === 'UPI' ? window.proof : '',
+    status: 'Placed',
+    t: Date.now()
+  };
+
+  window.S.orders.unshift(o);
+  window.cart = {vid: null, q: {}};
+  window.lastOrder = o.id;
+  window.save();
+
+  window.showOrderTicket(o.id);
+},
+
+viewTicket: id => window.showOrderTicket(id),
+
+closeReceipt: () => {
+  window.$('receiptModal').classList.add('hidden');
+  window.$('receiptModal').classList.remove('flex');
+  if(window.cur === 'checkout') window.go('orders');
+},
+
+openPayModal: id => {
+  const o = window.S.orders.find(x => String(x.id) === String(id));
+  if(!o) return;
+  window.activePayOid = id;
+  window.$('payModalOid').textContent = o.id;
+  window.$('payModalAmt').textContent = `Amount due: ₹${o.total}`;
+  window.$('payModal').classList.remove('hidden');
+  window.$('payModal').classList.add('flex');
+},
+
+closePayModal: () => {
+  window.$('payModal').classList.add('hidden');
+  window.$('payModal').classList.remove('flex');
+  window.activePayOid = null;
+  window.payModalProof = '';
+},
+
+submitPayProof: () => {
+  if(!window.activePayOid) return;
+  const o = window.S.orders.find(x => String(x.id) === String(window.activePayOid));
+  if(o){
+    o.paid = true;
+    if(window.payModalProof) o.proof = window.payModalProof;
+    window.save();
+    window.A.closePayModal();
+    window.render();
+    window.toast('Payment marked as verified!');
+  }
+},
+
+submitIssue: () => {
+  const oid = window.$('iss-oid').value;
+  const txt = window.$('iss-txt').value.trim();
+  if(!oid || !txt) return window.toast('Select order and enter complaint details');
+  const o = window.S.orders.find(x => String(x.id) === String(oid));
+  window.S.complaints.unshift({id: window.nid(), oid: oid, vid: o.vid, name: o.name, text: txt, open: true});
+  window.save();
+  window.$('iss-txt').value = '';
+  window.toast('Complaint ticket submitted');
+},
+
+waAlert: id => {
+  const o = window.S.orders.find(x => String(x.id) === String(id));
+  if(!o) return;
+  const v = window.S.vendors.find(x => String(x.id) === String(o.vid));
+  const msg = `Hi ${o.name}, friendly reminder from ${v?v.name:'Vendor'} for Order #${o.id} (₹${o.total}). Approx delivery time: ${v?v.win:''}. POC: ${v?(v.pocName||v.name):''} (${v?v.phone:''}). Please complete payment via UPI (${v?v.upi:''}). Thank you!`;
+  window.open(`https://wa.me/91${o.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+},
+
+exportExcel: () => {
+  const v = window.mv();
+  if(!v) return window.toast('Vendor profile not found');
+  const orders = window.S.orders.filter(o => String(o.vid) === String(v.id));
+  if(!orders.length) return window.toast('No orders available to export');
+
+  let csvContent = "Order ID,Date,Customer Name,Location/Hall,Room/Spot,Phone,Items Ordered,Total Amount (INR),Payment Method,Payment Status,Order Status\n";
+
+  orders.forEach(o => {
+    const dateStr = new Date(o.t || Date.now()).toLocaleString().replace(/,/g, '');
+    const itemsList = o.lines.map(l => `${l.name} (x${l.qty})`).join(' | ').replace(/,/g, ';');
+    const hall = String(o.hall || '').replace(/,/g, ' ');
+    const room = String(o.room || '').replace(/,/g, ' ');
+    const name = String(o.name || '').replace(/,/g, ' ');
+
+    csvContent += `"${o.id}","${dateStr}","${name}","${hall}","${room}","${o.phone}","${itemsList}",${o.total},"${o.method}","${o.paid ? 'Paid' : 'Unpaid'}","${o.status}"\n`;
+  });
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${v.name.replace(/\s+/g, '_')}_Order_History_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.toast('Excel (.csv) file downloaded successfully!');
+},
+
+openEmailModal: () => {
+  const u = window.me();
+  const v = window.mv();
+  if(!v) return;
+  const email = u ? u.email : 'vendor@iitkgp.ac.in';
+  const orders = window.S.orders.filter(o => String(o.vid) === String(v.id));
+
+  const subject = encodeURIComponent(`Order History Report - ${v.name}`);
+  const bodyText = `IIT KGP Campus Hub - Vendor Order Ledger%0D%0A` +
+    `Store: ${v.name}%0D%0A` +
+    `Total Orders: ${orders.length}%0D%0A%0D%0A` +
+    orders.map(o => `[${o.id}] ${o.name} - ₹${o.total} (${o.paid ? 'Paid' : 'Unpaid'}) | Spot: ${o.hall} ${o.room} | Phone: ${o.phone} | Status: ${o.status}`).join('%0D%0A');
+
+  window.open(`mailto:${email}?subject=${subject}&body=${bodyText}`, '_blank');
+  window.toast('Email client opened with order report draft!');
+},
+
+alertReady: id => {
+  const o = window.S.orders.find(x => String(x.id) === String(id));
+  if(!o) return;
+  const v = window.S.vendors.find(x => String(x.id) === String(o.vid));
+  const pickupLoc = v ? (v.pickupSpot || 'the store location') : 'store';
+  const msg = `Hi ${o.name}! 🎉 Your order #${o.id} (₹${o.total}) from ${v?v.name:'Vendor'} is READY FOR PICKUP! Please collect your item from: ${pickupLoc}. POC: ${v?(v.pocName||v.name):''} (${v?v.phone:''}).`;
+  window.open(`https://wa.me/91${o.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+},
+
+tab: v => { window.vtab=v; window.newImg=''; window.render(); },
+paid: id => { const o = window.S.orders.find(x => String(x.id) === String(id)); if(o) { o.paid=!o.paid; window.save(); window.render(); window.toast('Payment status updated'); } },
+proof: id => { const o = window.S.orders.find(x => String(x.id) === String(id)); if(o) { window.$('mimg').src=o.proof; window.$('modal').classList.remove('hidden'); window.$('modal').classList.add('flex'); } },
+closeModal: () => { window.$('modal').classList.add('hidden'); window.$('modal').classList.remove('flex'); },
+
+add: () => {
+  const name = window.$('n-name').value.trim();
+  const price = parseFloat(window.$('n-price').value);
+  const stock = parseInt(window.$('n-stock').value);
+
+  if(!name || isNaN(price) || isNaN(stock) || price<0 || stock<0) {
+    return window.toast('Enter a valid item name, price, and stock count');
+  }
+
+  window.S.items.push({id: window.nid(), vid: window.mv().id, name, price, stock, img: window.newImg});
+  window.newImg = '';
+  window.save();
+  window.render();
+  window.toast('Item successfully added to menu');
+},
+
+openEditItem: id => {
+  const i = window.S.items.find(x => String(x.id) === String(id));
+  if(!i) return window.toast('Item not found');
+  window.$('edit-id').value = i.id;
+  window.$('edit-name').value = i.name;
+  window.$('edit-price').value = i.price;
+  window.$('edit-stock').value = i.stock;
+  window.$('editItemModal').classList.remove('hidden');
+  window.$('editItemModal').classList.add('flex');
+},
+
+closeEditModal: () => {
+  window.$('editItemModal').classList.add('hidden');
+  window.$('editItemModal').classList.remove('flex');
+},
+
+saveItemEdit: () => {
+  const id = window.$('edit-id').value;
+  const name = window.$('edit-name').value.trim();
+  const price = parseFloat(window.$('edit-price').value);
+  const stock = parseInt(window.$('edit-stock').value);
+
+  if(!name || isNaN(price) || isNaN(stock) || price < 0 || stock < 0) {
+    return window.toast('Please provide valid details');
+  }
+
+  const item = window.S.items.find(x => String(x.id) === String(id));
+  if(item) {
+    item.name = name;
+    item.price = price;
+    item.stock = stock;
+    window.save();
+    window.A.closeEditModal();
+    window.render();
+    window.toast('Menu offering updated!');
+  }
+},
+
+openDeleteItem: id => {
+  const i = window.S.items.find(x => String(x.id) === String(id));
+  if(!i) return;
+  window.$('delete-id').value = i.id;
+  window.$('del-item-label').innerHTML = `Are you sure you want to remove <b class="text-white">${window.esc(i.name)}</b>?`;
+  window.$('deleteConfirmModal').classList.remove('hidden');
+  window.$('deleteConfirmModal').classList.add('flex');
+},
+
+closeDelModal: () => {
+  window.$('deleteConfirmModal').classList.add('hidden');
+  window.$('deleteConfirmModal').classList.remove('flex');
+},
+
+confirmDeleteItem: () => {
+  const id = window.$('delete-id').value;
+  window.S.items = window.S.items.filter(x => String(x.id) !== String(id));
+  window.save();
+  window.A.closeDelModal();
+  window.render();
+  window.toast('Item removed from menu');
+},
+
+showWebUrlModal: () => {
+  const currentUrl = window.location.href;
+  window.$('public-url-input').value = currentUrl;
+  window.$('url-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(currentUrl)}`;
+  window.$('webUrlModal').classList.remove('hidden');
+  window.$('webUrlModal').classList.add('flex');
+},
+
+closeWebUrlModal: () => {
+  window.$('webUrlModal').classList.add('hidden');
+  window.$('webUrlModal').classList.remove('flex');
+},
+
+copyPublicUrl: () => {
+  const url = window.location.href;
+  const v = window.mv();
+  const storeName = v ? v.name : 'IIT KGP Campus Store';
+  const textToCopy = `🏛️ *IIT KGP Campus Hub*\nOpen live store: ${storeName}\n\n🌐 Direct Website URL:\n${url}`;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textToCopy);
+  } else {
+    const textArea = document.createElement("textarea");
+    textArea.value = textToCopy;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+  }
+  window.toast('Direct Website URL copied! Paste it in WhatsApp.');
+},
+
+shareStoreLink: () => {
+  const v = window.mv();
+  const storeName = v ? v.name : 'IIT KGP Campus Hub Stores';
+  const platformUrl = window.location.href;
+  
+  const textToCopy = `🏛️ *IIT KGP Campus Hub*\nCheck out our shared campus store database for direct hall orders and services!\n\n🏪 *Store:* ${storeName}\n🔗 *Open Platform URL:* ${platformUrl}`;
+  
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textToCopy);
+  } else {
+    const textArea = document.createElement("textarea");
+    textArea.value = textToCopy;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+  }
+  window.toast('Platform URL & Store Invite copied to clipboard!');
+},
+
+resolve: id => {
+  const c = window.S.complaints.find(c => String(c.id) === String(id));
+  if(c) c.open = false;
+  window.save();
+  window.render();
+  window.toast('Complaint resolved');
+}
+};
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-a]');
+  if(b && window.A[b.dataset.a]) window.A[b.dataset.a](b.dataset.v);
+});
+
+document.addEventListener('change', e => {
+  const t = e.target, c = t.dataset.c;
+  if(!c) return;
+  if(c==='proof') window.readImg(t.files[0], 800, d=>{window.proof=d; window.toast('Screenshot attached');});
+  if(c==='payProof') window.readImg(t.files[0], 800, d=>{window.payModalProof=d; window.toast('Screenshot attached');});
+  if(c==='img') window.readImg(t.files[0], 350, d=>{window.newImg=d; window.toast('Menu photo attached');});
+  if(c==='status'){
+    const ord = window.S.orders.find(x => String(x.id) === String(t.dataset.v));
+    if(ord){ord.status=t.value; window.save(); window.toast('Order status updated');}
+  }
+  if(c==='win'){
+    const v = window.mv();
+    if(v){v.win=t.value.trim()||v.win; window.save(); window.toast('Window saved');}
+  }
+});
+
+// Initial Render
+window.render();
+</script>
+</body>
+</html>
