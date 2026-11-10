@@ -1412,10 +1412,13 @@ login: () => {
   const pass = window.$('l-pass').value.trim();
   if(!user || !pass) return window.toast('Please enter email/username and password');
 
+  // Use Firebase auth UID if available, or fallback to a unique key
+  const uniqueUid = auth.currentUser ? auth.currentUser.uid : 'user_' + window.nid();
+
   let u = window.S.users.find(x => x.email === user && x.role === window.role);
   if(!u){
     u = {
-      id: window.nid(),
+      id: uniqueUid,
       role: window.role,
       name: user.split('@')[0] || 'User',
       email: user,
@@ -1492,6 +1495,7 @@ logout: () => {
   window.S.session = null;
   window.role = null;
   window.authMode = 'choice';
+  localStorage.removeItem(window.KEY); // Clear local session cache
   window.save();
   window.go('landing');
 },
