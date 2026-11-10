@@ -275,14 +275,15 @@ import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.g
 import { getFirestore, doc, collection, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'iitkgp-hub-app';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-  apiKey: "demo",
-  authDomain: "demo.firebaseapp.com",
-  projectId: "demo",
-  storageBucket: "demo.appspot.com",
-  messagingSenderId: "12345",
-  appId: "1:12345:web:12345"
-};
+ const firebaseConfig = {
+    apiKey: "AIzaSyAmqLPSehxioUjxVIpuapuGozg1_NBIP4c",
+    authDomain: "kgp-hub.firebaseapp.com",
+    projectId: "kgp-hub",
+    storageBucket: "kgp-hub.firebasestorage.app",
+    messagingSenderId: "78829288736",
+    appId: "1:78829288736:web:fafa7473cba87f023d6b45",
+    measurementId: "G-5JVGPYC18Y"
+  };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
