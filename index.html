@@ -1412,24 +1412,28 @@ role: r => { window.role=r; window.authMode='choice'; if(window.S.session&&windo
 setAuthMode: m => { window.authMode=m; window.render(); },
 
 login: () => {
-  const user = window.$('l-user').value.trim().toLowerCase();
+  const userEmail = window.$('l-user').value.trim().toLowerCase();
   const pass = window.$('l-pass').value.trim();
-  if(!user || !pass) return window.toast('Please enter email/username and password');
+  if(!userEmail || !pass) return window.toast('Please enter email/username and password');
 
-  // Use Firebase auth UID if available, or fallback to a unique key
-  const uniqueUid = auth.currentUser ? auth.currentUser.uid : 'user_' + window.nid();
+  // Extract a clean name from the email prefix or use it as a base
+  const cleanName = userEmail.split('@')[0];
+  const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
 
-  let u = window.S.users.find(x => x.email === user && x.role === window.role);
+  let u = window.S.users.find(x => x.email === userEmail && x.role === window.role);
   if(!u){
     u = {
-      id: uniqueUid,
+      id: 'usr_' + window.nid(),
       role: window.role,
-      name: user.split('@')[0] || 'User',
-      email: user,
+      name: formattedName,
+      email: userEmail,
       phone: '9832145670',
       hall: 'Radhakrishnan (RK) Hall'
     };
     window.S.users.push(u);
+  } else {
+    // Update name if it was previously set incorrectly
+    u.name = formattedName;
   }
 
   window.S.session = { uid: u.id, role: window.role };
@@ -1450,11 +1454,11 @@ auth: () => {
 
   let u = window.S.users.find(x => x.email === email && x.role === window.role);
   if(u){
-    u.name = name;
+    u.name = name; // Forces update to the name you just typed
     u.phone = phone;
     if(hall) u.hall = hall;
   } else {
-    u = {id: window.nid(), role: window.role, name, email, phone, hall};
+    u = {id: 'usr_' + window.nid(), role: window.role, name, email, phone, hall};
     window.S.users.push(u);
   }
 
